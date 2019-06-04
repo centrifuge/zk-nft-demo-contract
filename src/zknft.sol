@@ -60,6 +60,7 @@ contract ZKNFT is ERC721Metadata {
         }
         return result;
     }
+    
     function uint2str(uint i) internal pure returns (string memory) {
         if (i == 0) return "0";
         uint j = i;
@@ -78,14 +79,14 @@ contract ZKNFT is ERC721Metadata {
     }
 
     // --- ZKNFT ---
-    function checkAnchorRoot(bytes32 doc_root, bytes32 signatures_root, bytes32 data_root) pure internal returns (bool) {
-        return doc_root == sha256(concat(data_root, signatures_root));
+    function checkAnchorRoot(bytes32 doc_root, bytes32 data_root, bytes32 signatures) pure internal returns (bool) {
+        return doc_root == sha256(concat(data_root, signatures));
     }
-    function mint (address usr, uint tkn, uint anchor, bytes32 signatures_root, bytes32 data_root, uint amount, bytes memory currency, uint rating, uint48 due_date) public returns (uint) {
+
+    function mint (address usr, uint tkn, uint anchor, bytes32 data_root, bytes32 signatures_root, uint amount, bytes memory currency, uint rating, uint48 due_date) public returns (uint) {
         bytes32 doc_root;
         (, doc_root, ) = anchors.getAnchorById(anchor);
-        require(doc_root == 0xde27f9ff25eedf37ac5fa789e297f950956a5787605d7dbf31e6aa832af75d13, "anchor-failed");
-        require(checkAnchorRoot(doc_root, signatures_root, data_root), "anchor-root-failed");
+        require(checkAnchorRoot(doc_root, data_root, signatures_root), "anchor-root-failed");
         require(verify(data_root, ratings, amount, rating), "snark-not-verified");
 
         data[tkn] = TokenData(amount, currency, due_date, anchor);

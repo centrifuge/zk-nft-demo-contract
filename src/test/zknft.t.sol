@@ -54,12 +54,14 @@ contract ZKNFTTest is DSTest  {
     function testMint() public logs_gas {
         bytes32 signatures = 0x363d7ba02d8bd6af6586ae794d5ab1be9d1b281281df901f16a50aa7ef015c4a;
         bytes32 data_root = 0xc7cf649fb3c4b262c280cc013d2a0189673ad3adc59af680eecae3238192df8e;
-        //bytes32 root_hash = sha256(concat(data_root, signatures));
         bytes32 root_hash = 0xde27f9ff25eedf37ac5fa789e297f950956a5787605d7dbf31e6aa832af75d13;
+        bytes memory preimg_con = concat(data_root, signatures);
+        bytes memory preimg = hex"c7cf649fb3c4b262c280cc013d2a0189673ad3adc59af680eecae3238192df8e363d7ba02d8bd6af6586ae794d5ab1be9d1b281281df901f16a50aa7ef015c4a";
         anchors.file(root_hash, 0); 
         nft = new ZKNFT("test", "TEST", address(anchors));
-        nft.mint(address(user1), 1, 1, "1", "2", 100, "chf", 10, 1000);
+        nft.mint(address(user1), 1, 1, data_root, signatures, 100, "chf", 10, 1000);
     }
+
     function concat(bytes32 b1, bytes32 b2) pure internal returns (bytes memory) {
         bytes memory result = new bytes(64);
         assembly {
