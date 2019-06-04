@@ -15,6 +15,7 @@
 
 pragma solidity >=0.4.24;
 
+import { ERC721Enumerable } from "./openzeppelin-solidity/token/ERC721/ERC721Enumerable.sol";
 import { ERC721Metadata } from "./openzeppelin-solidity/token/ERC721/ERC721Metadata.sol";
 
 contract AnchorLike {
@@ -24,12 +25,12 @@ contract AnchorLike {
 contract IdentityFactoryLike {
 }
 
-contract ZKNFT is ERC721Metadata {
+contract ZKNFT is ERC721Enumerable, ERC721Metadata {
     // --- Data ---
     AnchorLike public           anchors;
     IdentityFactoryLike public  identities;
     bytes32 public              ratings; 
-    
+    string public               uri_prefix; 
     struct TokenData {
         uint    amount;
         bytes   currency;
@@ -40,14 +41,17 @@ contract ZKNFT is ERC721Metadata {
 
     string public uri;
     
-    constructor (string memory name, string memory symbol, address anchors_) ERC721Metadata(name, symbol) public {
+    constructor (string memory name, string memory symbol, address anchors_) ERC721Enumerable() ERC721Metadata(name, symbol) public {
         anchors = AnchorLike(anchors_);
         //identities = IdentityFactoryLike(identities_);
     }
 
+    // TODO: Need auth & note
     function file(bytes32 what, bytes32 data_) public {
-        // TODO Needs auth
         if (what == "credit_rating") { ratings = data_; }
+    }
+    function file(bytes32 what, string memory data_) public {
+        if (what == "uri_prefix") { uri_prefix = data_; }
     }
 
     // --- Utils ---
@@ -97,6 +101,9 @@ contract ZKNFT is ERC721Metadata {
       // mock zokrates call
       return true;
     }
-} 
 
+    function tokenURI(uint256 tokenId) external view returns (string memory) {
+        return string(abi.encodePacked(uri_prefix, uint2str(tokenId)));
+    } 
+}
 
