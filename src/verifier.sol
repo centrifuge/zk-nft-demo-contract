@@ -602,7 +602,7 @@ contract Verifier {
             return false;
         }
     }
-    function test() public {
+    function test() public returns (uint) {
         uint[2] memory a = [
             0x2e16afcc953e26f2bb84184981a432b5456150693e0a7940881513b31b61805a,      
             0x0da7e604a37a38905461229619529d6a2bce95345601b7ec99f1b307c9a77862
