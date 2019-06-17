@@ -17,6 +17,7 @@ pragma solidity >=0.4.24;
 
 import { ERC721Enumerable } from "./openzeppelin-solidity/token/ERC721/ERC721Enumerable.sol";
 import { ERC721Metadata } from "./openzeppelin-solidity/token/ERC721/ERC721Metadata.sol";
+import "./verifier.sol";
 
 contract AnchorLike {
     function getAnchorById(uint) public returns (uint, bytes32, uint32);
@@ -25,7 +26,7 @@ contract AnchorLike {
 contract IdentityFactoryLike {
 }
 
-contract ZKNFT is ERC721Enumerable, ERC721Metadata {
+contract ZKNFT is Verifier, ERC721Enumerable, ERC721Metadata {
     // --- Data ---
     AnchorLike public           anchors;
     IdentityFactoryLike public  identities;
@@ -33,7 +34,6 @@ contract ZKNFT is ERC721Enumerable, ERC721Metadata {
     string public               uri_prefix; 
     struct TokenData {
         uint    amount;
-        bytes   currency;
         uint48  due_date;
         uint anchor;
     }
@@ -48,7 +48,7 @@ contract ZKNFT is ERC721Enumerable, ERC721Metadata {
 
     // TODO: Need auth & note
     function file(bytes32 what, bytes32 data_) public {
-        if (what == "credit_rating") { ratings = data_; }
+        if (what == "ratings") { ratings = data_; }
     }
     function file(bytes32 what, string memory data_) public {
         if (what == "uri_prefix") { uri_prefix = data_; }
@@ -83,23 +83,55 @@ contract ZKNFT is ERC721Enumerable, ERC721Metadata {
     }
 
     // --- ZKNFT ---
-    function checkAnchorRoot(bytes32 doc_root, bytes32 data_root, bytes32 signatures) pure internal returns (bool) {
-        return doc_root == sha256(concat(data_root, signatures));
+    function checkAnchor(uint anchor, bytes32 data, bytes32 sigs) public returns (bool) {
+        bytes32 root;
+        (, root, ) = anchors.getAnchorById(anchor);
+        return root == sha256(concat(data, sigs));
     }
 
-    function mint (address usr, uint tkn, uint anchor, bytes32 data_root, bytes32 signatures_root, uint amount, bytes memory currency, uint rating, uint48 due_date) public returns (uint) {
-        bytes32 doc_root;
-        (, doc_root, ) = anchors.getAnchorById(anchor);
-        require(checkAnchorRoot(doc_root, data_root, signatures_root), "anchor-root-failed");
-        require(verify(data_root, ratings, amount, rating), "snark-not-verified");
+    function mint (address usr, uint tkn, uint anchor, bytes32 data_root, bytes32 signatures_root, uint amount, uint rating, uint48 due_date, uint[8] memory points) public returns (uint) {
+        require(checkAnchor(anchor, data_root, signatures_root), "anchor-root-failed");
+        verify(data_root, amount, rating, points);
 
-        data[tkn] = TokenData(amount, currency, due_date, anchor);
+        data[tkn] = TokenData(amount, due_date, anchor);
         _mint(usr, tkn);
     }
-   
-    function verify(bytes32 data_root, bytes32 credit_rating_root, uint nft_amount, uint rating) pure internal returns (bool) {
-      // mock zokrates call
-      return true;
+ 
+    // unpack takes one bytes32 argument and turns it into two uint256 to make it fit into a field element
+    function unpack(bytes32 x) public returns (uint y, uint z) {
+        bytes32 a = bytes32(x);
+        bytes32 b = (a>> 128);
+        bytes32 c = ((a<< 128)>> 128);
+        return (uint(b), uint(c));
+    }
+
+    function verify(
+        bytes32 data_root, 
+        uint nft_amount, 
+        uint rating,
+        uint[8] memory points
+    ) public {
+        // NFT Amount shouldn't be bigger than a field element 
+        require(nft_amount <= 2**253);
+
+        uint[2] memory a = [points[0], points[1]];
+        uint[2][2] memory b = [[points[2], points[3]], [points[4], points[5]]];
+        uint[2] memory c = [points[6], points[7]];
+
+        // inputs:
+        // 0, 1 creditRatingRootHashField
+        // 2 buyerRatingField
+        // 3 nftAmount
+        // 4, 5 documentRootHashFiel
+        // 6 = one
+        uint[7] memory input;
+        (input[0], input[1]) = unpack(ratings);
+        input[2] = rating;
+        input[3] = nft_amount;
+        (input[4], input[5]) = unpack(data_root);
+        input[6] = 1;
+
+        require(verify(a, b, c, input));
     }
 
     function tokenURI(uint256 tokenId) external view returns (string memory) {
