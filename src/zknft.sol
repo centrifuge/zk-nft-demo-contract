@@ -17,20 +17,19 @@ pragma solidity >=0.4.24;
 
 import { ERC721Enumerable } from "./openzeppelin-solidity/token/ERC721/ERC721Enumerable.sol";
 import { ERC721Metadata } from "./openzeppelin-solidity/token/ERC721/ERC721Metadata.sol";
-import "./shortverifier.sol";
+import "./verifier.sol";
 
 contract AnchorLike {
     function getAnchorById(uint) public returns (uint, bytes32, uint32);
 }
 
-// The ShortZKNFT Contract uses a shortened Merkle tree (4 leaves in the tree instead 2**8)
-contract ShortZKNFT is Verifier, ERC721Enumerable, ERC721Metadata {
+contract ZKNFT is Verifier, ERC721Enumerable, ERC721Metadata {
     // --- Data ---
     AnchorLike public           anchors;
     bytes32 public              ratings; 
     string public               uri_prefix; 
     struct TokenData {
-        uint    amount;
+        uint amount;
         uint anchor;
         uint rating;
     }
@@ -127,7 +126,7 @@ contract ShortZKNFT is Verifier, ERC721Enumerable, ERC721Metadata {
         (input[4], input[5]) = unpack(data_root);
         input[6] = 1;
 
-        require(verify(a, b, c, input));
+        require(verifyTx(a, b, c, input));
     }
 
     function tokenURI(uint256 tokenId) external view returns (string memory) {

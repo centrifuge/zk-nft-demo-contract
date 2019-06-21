@@ -22,7 +22,7 @@ POINTS="[1b19dea8ba4e3c1643eb67a42667fd3cc50a189f54977e2f8ab0beee332b2a38,04316b
 
 ANCHOR_REPOSITORY=$(dapp create test/AnchorMock)
 
-NFT_REGISTRY=$(seth send --create out/DemoZKNFT.bin 'DemoZKNFT(string memory, string memory, address)' "Private Payment Obligation" "ZKNFT" $ANCHOR_REPOSITORY)
+NFT_REGISTRY=$(seth send --create out/ShortZKNFT.bin 'ShortZKNFT(string memory, string memory, address)' "Private Payment Obligation" "ZKNFT" $ANCHOR_REPOSITORY)
 
 # Set the anchor mock to return the document root
 seth send $ANCHOR_REPOSITORY 'file(bytes32, uint32)' $DOC_ROOT 00000000
@@ -30,6 +30,5 @@ seth send $ANCHOR_REPOSITORY 'file(bytes32, uint32)' $DOC_ROOT 00000000
 # Sending 'file("ratings", $RATINGS_ROOT)' sets the Merkle root on the ZKNFT contract. 
 seth send $NFT_REGISTRY 'file(bytes32,bytes32)' $(seth --to-bytes32 $(seth --from-ascii "ratings")) $(seth --to-bytes32 $RATINGS_ROOT)
 
-
 # Mint the NFT against the document root above while verifying the snark
-seth send $NFT_REGISTRY 'mint(address,uint,uint,bytes32,bytes32,uint,uint,uint48,uint[8] memory)(uint)' $ETH_FROM $TKN_ID $ANCHOR_ID $DATA_ROOT $SIG_ROOT $AMOUNT $RATING 1000 $POINTS 
+seth send $NFT_REGISTRY 'mint(address,uint,uint,bytes32,bytes32,uint,uint,uint[8] memory)(uint)' $ETH_FROM $TKN_ID $ANCHOR_ID $DATA_ROOT $SIG_ROOT $AMOUNT $RATING $POINTS 
