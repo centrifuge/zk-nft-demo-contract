@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -ex
+
+DATA_ROOT=0x0053790d7ab6faebde5fb18ea1a7789c1728b4541e3f2662c29fad40a09d599a
+SIG_ROOT=0x7619e5834eb2b4b13e4964435a32220518a72769897e8e313eb86e0ae69c81d9
+DOC_ROOT=0x9e88392297bb8724039f7bf8f7be295a8f506e81d9038620107c7ab782a89ed4
+AMOUNT=0x0000000000000000000000000000000000000000000000000000000000000140
+RATING=0x0000000000000000000000000000000000000000000000000000000000000064
+
+RATINGS_ROOT=0x058653f1572ef609a6576b89be3271f0f3e2d80669953c6f9cd2172a63bd5bac
+
+# The anchor registry stores the DOC_ROOT under ANCHOR_ID
+ANCHOR_PREIMAGE=$(dd if=/dev/urandom bs=32 count=1 | xxd -ps -c 200 | tr -d '\n')
+ANCHOR_ID=$(echo -n $ANCHOR_PREIMAGE | xxd -r -p | sha256sum | cut -d' ' -f1)
+
+# Pick a random tokenid under which to mint it
+TKN_ID=$(dd if=/dev/urandom bs=32 count=1 | xxd -ps -c 200 | tr -d '\n')
+
+# The points required to verify the zkSNARK
+POINTS="[1b19dea8ba4e3c1643eb67a42667fd3cc50a189f54977e2f8ab0beee332b2a38,04316b0283e31e05ca8f49baae7f1a4d52c2d2dcfacad1edb17c290a33a9cbef,269d4617a373ec216e4e730597f3924cb2e96f798f15a5a7421ebb77fb5c7012,26e6e0ed9573550db84449bd105d2739cc3ed7c91f1982d825095fde1209c0e8,2068e2f7f8638cd53df08e8e1976c7462ae368fbf4a600bc571dbaac0baac728,1f27463be8dad6fbbbe94b26ad170ff31f0e8bf4a009a07022457cf0e8bccccc,03f3f628e067520d9a36f714a5ba86cd2dbcae1d37e034b384786de3edb8b557,1347e3c4dbd373fd1f51129dd4ccf5882f1ecc849b76f4fdfd80f10399accdb9]"
+
+# Sending 'file("ratings", $RATINGS_ROOT)' sets the Merkle root on the ZKNFT contract. 
+seth send $NFT_REGISTRY 'file(bytes32,bytes32)' $(seth --to-bytes32 $(seth --from-ascii "ratings")) $RATINGS_ROOT
+
+# This commits the document root on chain
+seth send $ANCHOR_REPOSITORY 'commit(uint,bytes32,bytes32)' $ANCHOR_PREIMAGE $DOC_ROOT $(seth --to-bytes32 0x0)
+
+# Mint the NFT against the document root above while verifying the snark
+seth send $NFT_REGISTRY 'mint(address,uint,uint,bytes32,bytes32,uint,uint,uint48,uint[8] memory)(uint)' $ETH_FROM $TKN_ID $ANCHOR_ID $DATA_ROOT $SIG_ROOT $AMOUNT $RATING 1000 $POINTS 
