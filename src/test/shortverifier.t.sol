@@ -16,7 +16,7 @@
 pragma solidity >=0.4.23;
 
 import "ds-test/test.sol";
-import "../verifier.sol";
+import "../shortverifier.sol";
 
 
 contract VerifierTest is DSTest  {

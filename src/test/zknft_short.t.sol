@@ -16,7 +16,7 @@
 pragma solidity >=0.4.23;
 
 import "ds-test/test.sol";
-import "../zknft.sol";
+import "../zknft_short.sol";
 
 contract User {
     function doMint(address registry, address usr) public {
@@ -38,7 +38,7 @@ contract AnchorMock {
 }
 
 contract ZKNFTTest is DSTest  {
-    ZKNFT    nft;
+    DemoZKNFT    nft;
     address  self;
     User     user1;
     User     user2;
@@ -49,7 +49,7 @@ contract ZKNFTTest is DSTest  {
         user1 = new User();
         user2 = new User();
         anchors = new AnchorMock();
-        nft = new ZKNFT("test", "TEST", address(anchors));
+        nft = new DemoZKNFT("test", "TEST", address(anchors));
         nft.file("ratings", bytes32(uint(0x058653f1572ef609a6576b89be3271f0f3e2d80669953c6f9cd2172a63bd5bac)));
     }
 
