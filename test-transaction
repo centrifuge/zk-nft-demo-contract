@@ -19,7 +19,6 @@ TKN_ID=$(dd if=/dev/urandom bs=32 count=1 | xxd -ps -c 200 | tr -d '\n')
 # The points required to verify the zkSNARK
 POINTS="[1b19dea8ba4e3c1643eb67a42667fd3cc50a189f54977e2f8ab0beee332b2a38,04316b0283e31e05ca8f49baae7f1a4d52c2d2dcfacad1edb17c290a33a9cbef,269d4617a373ec216e4e730597f3924cb2e96f798f15a5a7421ebb77fb5c7012,26e6e0ed9573550db84449bd105d2739cc3ed7c91f1982d825095fde1209c0e8,2068e2f7f8638cd53df08e8e1976c7462ae368fbf4a600bc571dbaac0baac728,1f27463be8dad6fbbbe94b26ad170ff31f0e8bf4a009a07022457cf0e8bccccc,03f3f628e067520d9a36f714a5ba86cd2dbcae1d37e034b384786de3edb8b557,1347e3c4dbd373fd1f51129dd4ccf5882f1ecc849b76f4fdfd80f10399accdb9]"
 
-
 ANCHOR_REPOSITORY=$(dapp create test/AnchorMock)
 
 NFT_REGISTRY=$(seth send --create out/ShortZKNFT.bin 'ShortZKNFT(string memory, string memory, address)' "Private Payment Obligation" "ZKNFT" $ANCHOR_REPOSITORY)

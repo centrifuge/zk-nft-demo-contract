@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -ex
+
+ANCHOR_REPOSITORY=0x92AD44BB8F23D5d129eB82a50d3868bB4b1ceF1F
+NFT_REGISTRY=0xe1e70a83cdf8217b22950b08b78d815a1fb02a75
+
+DOC_ROOT=53e570f5cf74f9f7ab3bddcc082e028a01effaf1ca9cf752a3949a4bb03a1297
+DATA_ROOT=348cbfa17838c935cf9e18fe3021cfe861b204f8a2bf459556ec62f2895fc25a
+SIG_ROOT=1520b33f2ebf65439dc7e3583452d5604ea84c7b37316e2b4533e0156f65d522
+
+AMOUNT=0x0000000000000000000000000000000000000000000000000000000000000140
+RATING=0x0000000000000000000000000000000000000000000000000000000000000064
+
+RATINGS_ROOT=0x0c147066bdd01f80c493aa2ce3ae2535f84894db3967855b3326459af4dda22b
+RATINGS_ROOT=0xaba3f2af3c5c97f5aa54b81af14eb156e1c66790472354804009125b56773228
+# Pick a random tokenid under which to mint it
+TKN_ID=0x$(dd if=/dev/urandom bs=32 count=1 | xxd -ps -c 200 | tr -d '\n')
+
+POINTS="[2c99222c4650b31c7fc7b4706951e920d0ec70a5c9030765144e6562bdccf831,11a6856dcca54ead5b0b29e3ad41afcb4ed5a82707b4f6c62be9e1bca74bd646,1bb00732198d0432fab852e8f1e0b1256d4edb1b3938e66057fb8b421b055f05,1ede6690cedaa7c3b6655afaaa18d789092d65bbce25c0b8eabeb10ae78fc187,1e0edf788b2cc9b29f18e43f25b1892168b712d989e5c3a64f416cd99cf7b633,203bc0cf99e9414e3ce886f689b8467302dac2809960ba5d026b9492a76c1ddd,0119c4795950f1883effec6511fb0d6a9980b8bdfb01a8aa991983367ea5fa89,2c97e655052fc8e5de9456525b171e927b804538f5336ccf794637e8881d9fd0]"
+
+# The anchor registry stores the DOC_ROOT under ANCHOR_ID
+ANCHOR_PREIMAGE=$(dd if=/dev/urandom bs=32 count=1 | xxd -ps -c 200 | tr -d '\n')
+ANCHOR_ID=$(echo -n $ANCHOR_PREIMAGE | xxd -r -p | sha256sum | cut -d' ' -f1)
+
+seth send $ANCHOR_REPOSITORY 'commit(uint,bytes32,bytes32)' $ANCHOR_PREIMAGE $DOC_ROOT $(seth --to-bytes32 0x0)
+
+# Sending 'file("ratings", $RATINGS_ROOT)' sets the Merkle root on the ZKNFT contract. 
+#seth send $NFT_REGISTRY 'file(bytes32,bytes32)' $(seth --to-bytes32 $(seth --from-ascii "ratings")) $(seth --to-bytes32 $RATINGS_ROOT)
+
+# Mint the NFT against the document root above while verifying the snark
+seth send $NFT_REGISTRY 'mint(address,uint,uint,bytes32,bytes32,uint,uint,uint[8] memory)(uint)' $ETH_FROM $TKN_ID $ANCHOR_ID $DATA_ROOT $SIG_ROOT $AMOUNT $RATING $POINTS 
