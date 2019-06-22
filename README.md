@@ -34,3 +34,5 @@ Make sure you export the registry address that is printed as the variable NFT_RE
 The script `test-transaction` has a proof and the necessary data embedded to validate the circuit that is included in verifier.sol. You can execute it to see what it does.
 
 
+## Warning
+This is an proof-of-concept prototype. This implementation is not ready for production use. It does not yet contain all the features, careful code review, tests and integration that are needed for a deployment. Future changes to the cryptographic protocol and data formats are likely.
