@@ -243,7 +243,7 @@ r_hex = sig_hex[0:64]
 s_hex = sig_hex[64:128]
 msgForSign = (
     payload["public"]["document_roothash"]
-    + "00" # Need to append signature transition, might pass it as parameter in JSON
+    + payload["private"]["signature_transition"] # Need to append signature transition
 )
 msgForNext = (
   payload["public"]["document_roothash"]
@@ -280,7 +280,7 @@ b0 = bitstring.BitArray(int(M0, 16).to_bytes(32, "big")).bin
 # b1 = bitstring.BitArray(int(M1, 16).to_bytes(32, "big")).bin
 args = args + " " + " ".join(b0)
 #%%
-print("signatue")
+print("signature")
 print(nft.get_signature())
 
 #%%

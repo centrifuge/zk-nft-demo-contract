@@ -33,6 +33,24 @@ Make sure you export the registry address that is printed as the variable NFT_RE
 ### Testing
 The script `test-transaction` has a proof and the necessary data embedded to validate the circuit that is included in verifier.sol. You can execute it to see what it does.
 
+## Compile the circuit
+It assumes that Zokrates is installed and zokrates-pycrypto is part of your PYTHONPATH.
+
+Install Zokrates: https://zokrates.github.io/gettingstarted.html
+
+Install/Download Zokrates-pycrypto: https://github.com/Zokrates/pycrypto
+
+  ```$bash
+  mkdir -p out && cp proof_data.json out/
+  cd src
+  python3 input_generation.py #Produces out/nft_witness.txt  
+  cd circuit
+  zokrates compile -i nft.code --light #Produces out binary file
+  zokrates compute-witness -a $(cat ../out/nft_witness.txt) #Produces witness binary file
+  zokrates setup #Generates proving and verification keys
+  zokrates export-verifier #Produces verifier.sol solidity smart contract
+  zokrates generate-proof #Produces proof.json file that serves as input to verifier contract
+  ```
 
 ## Warning
 This is an proof-of-concept prototype. This implementation is not ready for production use. It does not yet contain all the features, careful code review, tests and integration that are needed for a deployment. Future changes to the cryptographic protocol and data formats are likely.
