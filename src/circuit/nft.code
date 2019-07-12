@@ -42,7 +42,7 @@ def concatInvoiceAmountLeaf(field[64] property, field[256] amountValue, field[25
   field[1024] out = [...data, 1, ...padding, ...dataLength]
   return out
 
-def main(field[2] creditRatingRootHashField, field buyerRatingField, privatefield[160] buyerID, privatefield[256] buyerPubkey, privatefield[2] directionCreditRatingTree, privatefield[256] creditRatingTreeDigest0, privatefield[256] creditRatingTreeDigest1, field nftAmount, field[2] documentRootHashField, privatefield[256] invoiceAmountValue, privatefield[64] invoiceAmountProperty, privatefield[256] invoiceAmountSalt, privatefield[8] invoiceAmountTreeDirection, privatefield[256] invoiceAmountTreeDigests0, privatefield[256] invoiceAmountTreeDigests1, privatefield[256] invoiceAmountTreeDigests2, privatefield[256] invoiceAmountTreeDigests3, privatefield[256] invoiceAmountTreeDigests4, privatefield[256] invoiceAmountTreeDigests5, privatefield[256] invoiceAmountTreeDigests6, privatefield[256] invoiceAmountTreeDigests7, privatefield[160] invoiceBuyerValue, privatefield[64] invoiceBuyerProperty, privatefield[256] invoiceBuyerSalt, privatefield[2] SignatureR, privatefield SignatureS, privatefield[2] BuyerPubKey) -> (field):
+def main(field[2] creditRatingRootHashField, field buyerRatingField, privatefield[160] buyerID, privatefield[256] buyerPubkey, privatefield[2] directionCreditRatingTree, privatefield[256] creditRatingTreeDigest0, privatefield[256] creditRatingTreeDigest1, field nftAmount, field[2] documentRootHashField, privatefield[256] invoiceAmountValue, privatefield[64] invoiceAmountProperty, privatefield[256] invoiceAmountSalt, privatefield[8] invoiceAmountTreeDirection, privatefield[256] invoiceAmountTreeDigests0, privatefield[256] invoiceAmountTreeDigests1, privatefield[256] invoiceAmountTreeDigests2, privatefield[256] invoiceAmountTreeDigests3, privatefield[256] invoiceAmountTreeDigests4, privatefield[256] invoiceAmountTreeDigests5, privatefield[256] invoiceAmountTreeDigests6, privatefield[256] invoiceAmountTreeDigests7, privatefield[160] invoiceBuyerValue, privatefield[64] invoiceBuyerProperty, privatefield[256] invoiceBuyerSalt, privatefield[8] invoiceBuyerTreeDirection, privatefield[256] invoiceBuyerTreeDigests0, privatefield[256] invoiceBuyerTreeDigests1, privatefield[256] invoiceBuyerTreeDigests2, privatefield[256] invoiceBuyerTreeDigests3, privatefield[256] invoiceBuyerTreeDigests4, privatefield[256] invoiceBuyerTreeDigests5, privatefield[256] invoiceBuyerTreeDigests6, privatefield[256] invoiceBuyerTreeDigests7, privatefield[2] SignatureR, privatefield SignatureS, privatefield[2] BuyerPubKey) -> (field):
 	context = context()
 
 	field[128] creditRatingRootHash0 = unpack128(creditRatingRootHashField[0])
@@ -65,7 +65,7 @@ def main(field[2] creditRatingRootHashField, field buyerRatingField, privatefiel
 	a, b, c, d = splitTo256bitChunks(invoiceAmountTreeValue)
 	field[256] leafInvoiceAmountTree = sha1024(a, b, c, d)
 	field invoiceAmountTreeResult = verifyMerkleHash8(documentRootHash, leafInvoiceAmountTree, invoiceAmountTreeDirection, invoiceAmountTreeDigests0, invoiceAmountTreeDigests1, invoiceAmountTreeDigests2, invoiceAmountTreeDigests3, invoiceAmountTreeDigests4, invoiceAmountTreeDigests5, invoiceAmountTreeDigests6, invoiceAmountTreeDigests7)
-	
+
 	field[1024] invoiceBuyerTreeValue = concatInvoiceBuyerLeaf(invoiceBuyerProperty, invoiceBuyerValue, invoiceBuyerSalt)
 	a, b, c, d = splitTo256bitChunks(invoiceBuyerTreeValue)
 	field[256] leafInvoiceBuyerTree = sha1024(a, b, c, d)
@@ -79,4 +79,4 @@ def main(field[2] creditRatingRootHashField, field buyerRatingField, privatefiel
 	invoiceAmountValueField = pack256(invoiceAmountValue)
   field out = if invoiceAmountValueField > nftAmount then 1 else 0 fi
 
-	return 1
+	return out
